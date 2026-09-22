@@ -1,0 +1,438 @@
+import java.sql.;import java.sql.;
+
+import java.util.Scanner;
+
+import java.util.HashSet;
+
+import java.util.Set;
+
+public class BusTicketBooking {
+
+static final String URL = "jdbc:mysql://localhost:3306/busbooking";
+
+static final String USER = "root";
+
+static final String PASSWORD = "test@123";
+
+static Connection con;
+
+static Scanner sc = new Scanner(System.in);
+
+public static void main(String[] args) {
+
+try {
+
+Class.forName("com.mysql.cj.jdbc.Driver");
+
+con = DriverManager.getConnection(URL, USER, PASSWORD);
+
+int choice;
+
+do {
+
+System.out.println("
+
+===== BUS TICKET BOOKING SYSTEM =====");
+
+System.out.println("1. Display Seat Status");
+
+System.out.println("2. Book Ticket");
+
+System.out.println("3. Cancel Ticket");
+
+System.out.println("4. View Customer Details");
+
+System.out.println("5. Exit");
+
+System.out.print("Enter your choice : ");
+
+choice = sc.nextInt();
+
+sc.nextLine();
+
+switch (choice) {
+
+case 1:
+
+displaySeats();
+
+break;
+
+case 2:
+
+bookTicket();
+
+break;
+
+case 3:
+
+cancelTicket();
+
+break;
+
+case 4:
+
+viewCustomers();
+
+break;
+
+case 5:
+
+System.out.println("Thank You...");
+
+break;
+
+default:
+
+System.out.println("Invalid Choice");
+
+}
+
+} while (choice != 5);
+
+con.close();
+
+}
+
+catch (ClassNotFoundException e) {
+
+System.out.println("MySQL JDBC Driver Not Found.");
+
+}
+
+catch (SQLException e) {
+
+System.out.println("Database Error : " + e.getMessage());
+
+}
+
+catch (Exception e) {
+
+System.out.println(e);
+
+}
+
+}
+
+static void displaySeats() throws SQLException {
+
+System.out.println("
+
+Seat Status");
+
+System.out.println("----------------------");
+
+Set<Integer> bookedSeats = new HashSet<>();
+
+Statement st = con.createStatement();
+
+ResultSet rs = st.executeQuery("SELECT seatNo FROM bookings");
+
+while (rs.next()) {
+
+bookedSeats.add(rs.getInt("seatNo"));
+
+}
+
+for (int i = 1; i <= 10; i++) {
+
+if (bookedSeats.contains(i))
+
+System.out.println("Seat " + i + " : Booked");
+
+else
+
+System.out.println("Seat " + i + " : Available");
+
+}
+
+}
+
+static void bookTicket() throws SQLException {
+
+System.out.print("Enter Seat Number (1-10): ");
+
+int seat = sc.nextInt();
+
+sc.nextLine();
+
+if (seat < 1 || seat > 10) {
+
+System.out.println("Invalid Seat Number");
+
+return;
+
+}
+
+PreparedStatement check = con.prepareStatement(
+
+"SELECT * FROM bookings WHERE seatNo=?");
+
+check.setInt(1, seat);
+
+ResultSet rs = check.executeQuery();
+
+if (rs.next()) {
+
+System.out.println("Seat Already Booked.");
+
+return;
+
+}
+
+System.out.print("Enter Name : ");
+
+String name = sc.nextLine();
+
+System.out.print("Enter Age : ");
+
+int age = sc.nextInt();
+
+sc.nextLine();
+
+System.out.print("Enter Gender : ");
+
+String gender = sc.nextLine();
+
+System.out.print("Enter Phone : ");
+
+String phone = sc.nextLine();
+
+PreparedStatement ps = con.prepareStatement(
+
+"INSERT INTO bookings VALUES(?,?,?,?,?)");
+
+ps.setInt(1, seat);
+
+ps.setString(2, name);
+
+ps.setInt(3, age);
+
+ps.setString(4, gender);
+
+ps.setString(5, phone);
+
+ps.executeUpdate();
+
+System.out.println("Ticket Booked Successfully.");
+
+}
+
+static void cancelTicket() throws SQLException {
+
+System.out.print("Enter Seat Number : ");
+
+int seat = sc.nextInt();
+
+sc.nextLine();
+
+PreparedStatement ps = con.prepareStatement(
+
+"DELETE FROM bookings WHERE seatNo=?");
+
+ps.setInt(1, seat);
+
+int row = ps.executeUpdate();
+
+if (row > 0)
+
+System.out.println("Ticket Cancelled Successfully.");
+
+else
+
+System.out.println("Seat Not Booked.");
+
+}
+
+static void viewCustomers() throws SQLException {
+
+Statement st = con.createStatement();
+
+ResultSet rs = st.executeQuery("SELECT * FROM bookings");
+
+System.out.println("
+
+Booked Customer Details");
+
+System.out.println("--------------------------------");
+
+boolean found = false;
+
+while (rs.next()) {
+
+found = true;
+
+System.out.println("Seat No : " + rs.getInt("seatNo"));
+
+System.out.println("Name : " + rs.getString("name"));
+
+System.out.println("Age : " + rs.getInt("age"));
+
+System.out.println("Gender : " + rs.getString("gender"));
+
+System.out.println("Phone : " + rs.getString("phone"));
+
+System.out.println("--------------------------------");
+
+}
+
+if (!found)
+
+System.out.println("No Bookings Found.");
+
+}
+
+}
+
+
+OUTPUT:
+
+run:
+
+===== BUS TICKET BOOKING SYSTEM =====
+
+1. Display Seat Status
+
+2. Book Ticket
+
+3. Cancel TicketS
+
+4. View Customer Details
+
+5. Exit
+
+Enter your choice : 1
+
+Seat Status
+
+----------------------
+
+Seat 1 : Booked
+
+Seat 2 : Booked
+
+Seat 3 : Available
+
+Seat 4 : Available
+
+Seat 5 : Booked
+
+Seat 6 : Available
+
+Seat 7 : Available
+
+Seat 8 : Available
+
+Seat 9 : Available
+
+Seat 10 : Available
+
+===== BUS TICKET BOOKING SYSTEM =====
+
+1. Display Seat Status
+
+2. Book Ticket
+
+3. Cancel TicketS
+
+4. View Customer Details
+
+5. Exit
+
+Enter your choice : 2
+
+Enter Seat Number (1-10): 5
+
+Seat Already Booked.
+
+===== BUS TICKET BOOKING SYSTEM =====
+
+1. Display Seat Status
+
+2. Book Ticket
+
+3. Cancel TicketS
+
+4. View Customer Details
+
+5. Exit
+
+Enter your choice : 2
+
+Enter Seat Number (1-10): 3
+
+Enter Name :
+
+Enter Age : 25
+
+Enter Gender : f
+
+Enter Phone : 8373435637
+
+Ticket Booked Successfully.
+
+===== BUS TICKET BOOKING SYSTEM =====
+
+1. Display Seat Status
+
+2. Book Ticket
+
+3. Cancel TicketS
+
+4. View Customer Details
+
+5. Exit
+
+Enter your choice : 4
+
+Booked Customer Details
+
+--------------------------------
+
+Seat No : 1
+
+Name : SS
+
+Age : 22
+
+Gender : F
+
+Phone : 3333
+
+--------------------------------
+
+Seat No : 2
+
+Name : Ragavi
+
+Age : 18
+
+Gender : f
+
+Phone : 6666677777
+
+--------------------------------
+
+Seat No : 3
+
+Name :
+
+Age : 25
+
+Gender : f
+
+Phone : 8373435637
+
+--------------------------------
+
+Seat No : 5
+
+Name : akshu
+
+Age : 18
+
+Gender : female3
+
+Phone : 87645246785
+
+---------------------------
