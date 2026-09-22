@@ -1,0 +1,61 @@
+import java.util.Scanner;
+
+interface BankAccount {
+    void deposit(double amount);
+    void withdraw(double amount) throws Exception;
+    void balanceEnquiry();
+}
+
+class Bank implements BankAccount {
+    double balance = 1000;
+
+    public void deposit(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Invalid deposit amount");
+        }
+        balance += amount;
+        System.out.println("Amount deposited: " + amount);
+    }
+
+    public void withdraw(double amount) throws Exception {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Invalid withdrawal amount");
+        }
+        if (amount > balance) {
+            throw new Exception("Insufficient balance");
+        }
+        balance -= amount;
+        System.out.println("Amount withdrawn: " + amount);
+    }
+
+    public void balanceEnquiry() {
+        System.out.println("Current Balance: " + balance);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Bank b = new Bank();
+
+        try {
+            System.out.print("Enter deposit amount: ");
+            double deposit = sc.nextDouble();
+            b.deposit(deposit);
+
+            System.out.print("Enter withdrawal amount: ");
+            double withdraw = sc.nextDouble();
+            b.withdraw(withdraw);
+
+            b.balanceEnquiry();
+        }
+        catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        sc.close();
+    }
+}
